@@ -1,0 +1,84 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080b18">
+<title>Gojo Satoru AI</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080b18;color:#f4f6ff;font-family:Arial,sans-serif}
+header{padding:20px;text-align:center;border-bottom:1px solid #27304a}
+h1{margin:0;color:#8b9dff;font-size:25px}
+header p{color:#aab2cc;font-size:13px}
+#chat{max-width:700px;margin:auto;padding:20px;height:65vh;overflow:auto}
+.msg{padding:13px 15px;margin:12px 0;border-radius:15px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.user{background:#29345d;margin-left:35px}
+.ai{background:#151c31;margin-right:35px}
+form{max-width:700px;margin:auto;padding:12px;display:flex;gap:8px}
+input{flex:1;min-width:0;padding:14px;border-radius:12px;border:1px solid #384365;background:#11172a;color:white}
+button{border:0;border-radius:12px;background:#657bff;color:white;padding:0 18px;font-weight:bold}
+button:disabled{opacity:.5}
+footer{text-align:center;color:#77809b;font-size:12px;padding:10px}
+</style>
+</head>
+<body>
+<header>
+<h1>✦ Gojo Satoru AI</h1>
+<p>Teman ngobrol AI kamu</p>
+</header>
+<main id="chat">
+<div class="msg ai">Yo! Aku Gojo Satoru AI 😎 Mau ngobrol apa hari ini?</div>
+</main>
+<form id="form">
+<input id="message" placeholder="Tulis pesan kamu..." autocomplete="off" required>
+<button id="send" type="submit">Kirim</button>
+</form>
+<footer>Gojo Satoru AI · Powered by OpenAI</footer>
+<script>
+const form=document.getElementById("form");
+const input=document.getElementById("message");
+const chat=document.getElementById("chat");
+const send=document.getElementById("send");
+
+function bubble(text,who){
+ const el=document.createElement("div");
+ el.className="msg "+who;
+ el.textContent=text;
+ chat.appendChild(el);
+ chat.scrollTop=chat.scrollHeight;
+}
+
+form.addEventListener("submit",async e=>{
+ e.preventDefault();
+ const message=input.value.trim();
+ if(!message)return;
+ bubble(message,"user");
+ input.value="";
+ send.disabled=true;
+ send.textContent="...";
+ const waiting=document.createElement("div");
+ waiting.className="msg ai";
+ waiting.textContent="Gojo sedang berpikir...";
+ chat.appendChild(waiting);
+ try{
+  const r=await fetch("/api/chat",{
+   method:"POST",
+   headers:{"Content-Type":"application/json"},
+   body:JSON.stringify({message})
+  });
+  const data=await r.json();
+  waiting.textContent=r.ok?(data.reply||"Tidak ada jawaban."):
+   (data.error||"Terjadi kesalahan.");
+ }catch(err){
+  waiting.textContent="Tidak terhubung ke server. Coba lagi nanti.";
+ }
+ send.disabled=false;
+ send.textContent="Kirim";
+ input.focus();
+ chat.scrollTop=chat.scrollHeight;
+});
+</script>
+</body>
+</html>
